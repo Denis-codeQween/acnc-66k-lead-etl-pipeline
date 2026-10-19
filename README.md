@@ -120,6 +120,3 @@ python filter_clean_leads.py
 ## 🛡️ License
 
 Distributed under the MIT License. Feel free to adapt for commercial or research projects.
-┌─────────────────────────────────┐
-│ Final Verified Lead Output      │ (Clean Excel File: 3,886+ Rows)
-└─────────────────────────────────┘
