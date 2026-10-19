@@ -6,7 +6,7 @@
 
 ## 📌 Project Overview
 
-Extracting contact details and verified decision-maker emails for 66,000+ registered charities from the official Australian Charities and Not-for-profits Commission (ACNC) dataset presents several engineering challenges: missing emails in public registries, strict search engine anti-bot rate limits, and massive dataset scale.
+Extracting contact details and verified decision-maker emails for 66,000+ registered charities from the official Australian Charities and Not-for-profits Commission (ACNC) dataset presents several engineering challenges: **the official public registry lacks direct email addresses**, search engine anti-bot rate limits are strict, and the dataset scale is massive.
 
 This project delivers an automated, fault-tolerant Python solution that enriches raw public registry records with verified email addresses discovered via Google SERP search, handles anti-bot rate-limiting gracefully, and exports clean, production-ready lead lists.
 
