@@ -18,16 +18,16 @@ A resilient, high-throughput asynchronous Python ETL pipeline engineered to extr
 
 ## Pipeline Architecture
 
-<pre><code>[ACNC Dynamics API] 
-        │
-        ▼ (Async Browser-Impersonated Sessions via curl_cffi)
-[pipeline.py] ──► Streams raw JSONL (acnc_results.jsonl) + Saves state (progress.json)
-        │
-        ▼ (Filtering: Status == 'Registered' & Schema Mapping)
-[transform_to_tz.py] ──► Deduplicates & Normalizes via Pandas
-        │
-        ▼
-[clean_charities_emails.xlsx] (66,043 Verified Records Ready for CRM/Outreach)</code></pre>
+    [ACNC Dynamics API] 
+            │
+            ▼ (Async Browser-Impersonated Sessions via curl_cffi)
+    [pipeline.py] ──► Streams raw JSONL (acnc_results.jsonl) + Saves state (progress.json)
+            │
+            ▼ (Filtering: Status == 'Registered' & Schema Mapping)
+    [transform_to_tz.py] ──► Deduplicates & Normalizes via Pandas
+            │
+            ▼
+    [clean_charities_emails.xlsx] (66,043 Verified Records Ready for CRM/Outreach)
 
 ---
 
@@ -59,8 +59,10 @@ The final `.xlsx` deliverable strictly adheres to enterprise B2B/CRM import spec
 ## Quick Start
 
 1. **Install dependencies:**
-<pre><code>pip install -r requirements.txt</code></pre>
+
+    pip install -r requirements.txt
 
 2. **Run extraction & transformation pipeline (with auto-resume):**
-<pre><code>python pipeline.py
-python transform_to_tz.py</code></pre>
+
+    python pipeline.py
+    python transform_to_tz.py
