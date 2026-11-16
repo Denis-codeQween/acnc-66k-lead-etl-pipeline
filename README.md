@@ -1,124 +1,72 @@
-# 📊 ACNC 66K Lead ETL — Hybrid Data Enrichment Pipeline
+# ACNC 66K+ Charity Registry ETL & Direct API Pipeline
 
-> **High-performance Python ETL & Data Enrichment pipeline designed to enrich and clean 66,000+ Australian Charity (ACNC) records using Playwright Google SERP fallback, Human-in-the-Loop captcha handling, and Pandas validation.**
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![curl_cffi](https://shields.io)
+![Pandas](https://img.shields.io/badge/ETL-Pandas%20%26%20OpenPyXL-orange.svg)
 
----
-
-## 📌 Project Overview
-
-Extracting contact details and verified decision-maker emails for 66,000+ registered charities from the official Australian Charities and Not-for-profits Commission (ACNC) dataset presents several engineering challenges: **the official public registry lacks direct email addresses**, search engine anti-bot rate limits are strict, and the dataset scale is massive.
-
-This project delivers an automated, fault-tolerant Python solution that enriches raw public registry records with verified email addresses discovered via Google SERP search, handles anti-bot rate-limiting gracefully, and exports clean, production-ready lead lists.
-
-During testing on a batch of 4,300 registry records, the pipeline yielded **3,886 pristine, fully-enriched leads** containing valid ABNs, charity legal names, physical addresses, and verified direct emails.
+A resilient, high-throughput Python ETL pipeline engineered to extract, validate, and normalize **95,800+ charity records** directly from the Australian Charities and Not-for-profits Commission (ACNC) public Microsoft Dynamics API, yielding **66,043+ active, verified organizational profiles** with direct contact emails and structured physical addresses.
 
 ---
 
-## 🏗️ Architecture & Pipeline Strategy
+## Key Architectural Highlights
+
+* **Direct API Extraction & Resilient Sessions (`curl_cffi`):** Eliminates slow headless browser overhead by querying underlying public API endpoints directly with browser-impersonated TLS handshakes (`chrome124`) and automatic HTTP/2 session rotation to prevent stream resets.
+* **Fault-Tolerant Checkpointing (`progress.json` & `.jsonl`):** Streams raw JSON responses incrementally to disk (`acnc_results.jsonl`) with real-time state tracking, allowing seamless resumption from the exact point of interruption without data loss.
+* **Strict Schema Normalization (`Pandas` & `OpenPyXL`):** Filters raw historical dumps (`95,828` total records) down to strictly active entities (`Status == Registered`, `66,043` rows), maps nested address schemas (`AddressLine1`, `AddressSuburb`, `AddressStateOrProvince`, `AddressPostalCode`), deduplicates entries, and exports client-ready `.xlsx` deliverables.
+
+---
+
+## Pipeline Architecture
 
 ```text
-┌─────────────────────────────────┐
-│ Raw ACNC Registry Data          │ (66,000+ Records, data.gov.au)
-└────────────────┬────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────┐
-│ Google SERP Enrichment Engine   │ (Playwright + Smart Pauses)
-│  - Custom Manual Overrides      │
-│  - Google SERP Extraction       │
-│  - Human-in-the-Loop Captcha    │
-└────────────────┬────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────┐
-│ State Persistence & Checkpoints │ (Auto-saves every 50 records)
-└────────────────┬────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────┐
-│ Data Transformation & Cleanup   │ (Pandas ETL Workflow)
-│  - Remove "Not found" / NaNs    │
-│  - Filter Out Invalid Domains   │
-└────────────────┬────────────────┘
-                 │
-                 ▼
-┌─────────────────────────────────┐
-│ Final Verified Lead Output      │ (Clean Excel File: 3,886+ Rows)
-└─────────────────────────────────┘
+[ACNC Dynamics API] 
+       │
+       ▼ (Async Browser-Impersonated Sessions via curl_cffi)
+[pipeline.py] ──► Streams raw JSONL (acnc_results.jsonl) + Saves state (progress.json)
+       │
+       ▼ (Filtering: Status == 'Registered' & Schema Mapping)
+[transform_to_tz.py] ──► Deduplicates & Normalizes via Pandas
+       │
+       ▼
+[clean_charities_emails.xlsx] (66,043 Verified Records Ready for CRM/Outreach)
 ```
 
 ---
 
-## ✨ Key Technical Features
+## Output Data Schema
 
-- **Google SERP Fallback Extractor:** Automatically queries Google Search (`acnc ABN: {abn} | {name} email`) via Playwright to discover off-site contact emails when official registry profiles lack direct contact info.
-- **🛡️ Human-in-the-Loop Anti-Bot Resilience:** Built-in detection for Cloudflare / Google ReCAPTCHA rate limits. Pauses execution and alerts the operator to solve captchas manually without losing browser state or crashing the script.
-- **⏱️ Long-Running Execution & State Persistence:** Designed for multi-day uninterrupted processing across 66,000+ rows with state checkpoints every 50 records to enable instant resume after power or network disconnects.
-- **🧹 Intelligent Regex & Domain Filtering:** Filters out generic system domains (`google.com`, `schema.org`, `w3.org`, `example.com`) and extracts only valid, format-compliant email addresses.
-- **📊 Pandas Lead Filtering:** Dedicated post-processing stage (`filter_clean_leads.py`) that eliminates incomplete records (missing ABNs, empty emails, or `"Not found"` tags) to yield high-quality leads.
+The final `.xlsx` deliverable strictly adheres to enterprise B2B/CRM import specifications:
 
----
-
-## 🛠️ Tech Stack
-
-- **Language:** Python 3.10+
-- **Browser Automation:** Playwright (Chromium)
-- **Data Engineering & ETL:** Pandas, OpenPyXL
-- **Regular Expressions:** `re` module for email validation
-- **Data Storage:** Excel (`.xlsx`) and Plain Text (`.txt`)
-
----
-
-## 📁 Repository Structure
-
-```text
-acnc-66k-lead-etl-pipeline/
-├── search_emails.py          # Google SERP extraction with state checkpoints & captcha pauses
-├── filter_clean_leads.py     # Pandas script to filter valid ABNs and verified emails
-├── extract_abns.py           # Helper utility to extract clean ABN lists from raw dataset
-├── README.md                 # Project documentation
-└── docs/
-    └── dataset_preview.jpg   # Output snapshot preview
-```
+| Column | Source Field | Description |
+| :--- | :--- | :--- |
+| `ABN` | `Abn` | Validated Australian Business Number |
+| `Charity_Legal_Name` | `Name` | Official registered entity name |
+| `Address_1_Address_Line_1` | `AddressLine1` | Primary street / PO Box address |
+| `Address_1_Address_Line_2` | `AddressLine2` | Secondary suite / building info |
+| `Town_City` | `AddressSuburb` | Normalized suburb or city |
+| `State` | `AddressStateOrProvince` | Australian state/territory code (`NSW`, `VIC`, `QLD`, etc.) |
+| `Postcode` | `AddressPostalCode` | 4-digit postal code |
+| `Country` | `AddressCountry` | Country identifier (`Australia`) |
+| `Charity_Size` | `CharitySize` | Official ACNC tier (`Small`, `Medium`, `Large`) |
+| `Email` | `Email` | Direct organizational contact email |
 
 ---
 
-## 📊 Pipeline Output Preview
+## Dataset Preview
 
-Below is a snapshot of the final processed dataset (`clean_charities_emails.xlsx`) containing verified ABNs, structured company details, and clean e-mail addresses:
-
-![Clean Dataset Output](docs/dataset_preview.jpg)
+![Dataset Preview](docs/dataset_preview.jpg)
 
 ---
 
-## 🚀 Quick Start & Usage
+## Quick Start
 
-### 1. Prerequisites
-Ensure Python 3.10+ is installed along with required packages and Playwright browsers:
+1. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-pip install pandas openpyxl playwright
-playwright install chromium
-```
-
-### 2. Run Data Enrichment
-Place your input file `datadotgov_main.xlsx` in the root directory and start the extraction pipeline:
-
-```bash
-python search_emails.py
-```
-
-*Note: If Google ReCAPTCHA appears during long runs, the script will log a prompt and pause to allow manual resolution in the headful browser before continuing.*
-
-### 3. Run Post-Processing & Cleanup
-Filter out non-matching rows and export the final lead dataset:
-
-```bash
-python filter_clean_leads.py
-```
-
----
-
-## 🛡️ License
-
-Distributed under the MIT License. Feel free to adapt for commercial or research projects.
+2. **Run extraction & transformation pipeline (with auto-resume):**
+   ```bash
+   python pipeline.py
+   python transform_to_tz.py
+   ```
