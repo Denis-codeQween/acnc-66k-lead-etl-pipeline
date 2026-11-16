@@ -1,8 +1,8 @@
 # ACNC 66K+ Charity Registry ETL & Direct API Pipeline
 
-![Python](https://shields.io)
-![curl_cffi](https://shields.io)
-![Pandas](https://shields.io)
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![curl_cffi](https://img.shields.io/badge/HTTP-curl__cffi%20(TLS%20Spoofing)-green.svg)
+![Pandas](https://img.shields.io/badge/ETL-Pandas%20%26%20OpenPyXL-orange.svg)
 
 A resilient, high-throughput asynchronous Python ETL pipeline engineered to extract, validate, and normalize **95,800+ charity records** directly from the Australian Charities and Not-for-profits Commission (ACNC) public Microsoft Dynamics API in **~5 hours** (slashing legacy 5–6 day browser scraping cycles), yielding **66,043+ active, verified organizational profiles** with direct contact emails and structured physical addresses.
 
@@ -18,16 +18,16 @@ A resilient, high-throughput asynchronous Python ETL pipeline engineered to extr
 
 ## Pipeline Architecture
 
-    [ACNC Dynamics API] 
-            │
-            ▼ (Async Browser-Impersonated Sessions via curl_cffi)
-    [pipeline.py] ──► Streams raw JSONL (acnc_results.jsonl) + Saves state (progress.json)
-            │
-            ▼ (Filtering: Status == 'Registered' & Schema Mapping)
-    [transform_to_tz.py] ──► Deduplicates & Normalizes via Pandas
-            │
-            ▼
-    [clean_charities_emails.xlsx] (66,043 Verified Records Ready for CRM/Outreach)
+<pre><code>[ACNC Dynamics API] 
+        │
+        ▼ (Async Browser-Impersonated Sessions via curl_cffi)
+[pipeline.py] ──► Streams raw JSONL (acnc_results.jsonl) + Saves state (progress.json)
+        │
+        ▼ (Filtering: Status == 'Registered' & Schema Mapping)
+[transform_to_tz.py] ──► Deduplicates & Normalizes via Pandas
+        │
+        ▼
+[clean_charities_emails.xlsx] (66,043 Verified Records Ready for CRM/Outreach)</code></pre>
 
 ---
 
@@ -59,10 +59,9 @@ The final `.xlsx` deliverable strictly adheres to enterprise B2B/CRM import spec
 ## Quick Start
 
 1. **Install dependencies:**
-
-    pip install -r requirements.txt
+<pre><code>pip install -r requirements.txt</code></pre>
 
 2. **Run extraction & transformation pipeline (with auto-resume):**
+<pre><code>python pipeline.py
+python transform_to_tz.py</code></pre>
 
-    python pipeline.py
-    python transform_to_tz.py
