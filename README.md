@@ -1,7 +1,7 @@
 # ACNC 66K+ Charity Registry ETL & Direct API Pipeline
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
-![curl_cffi](https://shields.io)
+![curl_cffi](https://img.shields.io/badge/HTTP-curl__cffi%20(TLS%20Spoofing)-green.svg)
 ![Pandas](https://img.shields.io/badge/ETL-Pandas%20%26%20OpenPyXL-orange.svg)
 
 A resilient, high-throughput Python ETL pipeline engineered to extract, validate, and normalize **95,800+ charity records** directly from the Australian Charities and Not-for-profits Commission (ACNC) public Microsoft Dynamics API, yielding **66,043+ active, verified organizational profiles** with direct contact emails and structured physical addresses.
