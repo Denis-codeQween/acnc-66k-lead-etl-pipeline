@@ -58,10 +58,19 @@ The final `.xlsx` deliverable strictly adheres to enterprise B2B/CRM import spec
 
 ## Quick Start
 
-1. **Install dependencies:**
-<pre><code>pip install -r requirements.txt</code></pre>
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Denis-codeQween/acnc-66k-lead-etl-pipeline
+   cd acnc-66k-lead-etl-pipeline
+   ```
 
-2. **Run extraction & transformation pipeline (with auto-resume):**
-<pre><code>python pipeline.py
-python transform_to_tz.py</code></pre>
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+3. **Run extraction & transformation pipeline (with auto-resume):**
+   ```bash
+   python pipeline.py
+   python transform_to_tz.py
+   ```
