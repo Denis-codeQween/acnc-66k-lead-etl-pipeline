@@ -60,7 +60,7 @@ The final `.xlsx` deliverable strictly adheres to enterprise B2B/CRM import spec
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Denis-codeQween/acnc-66k-lead-etl-pipeline
+   git clone https://github.com/Denis-codeQween/acnc-66k-lead-etl-pipeline.git
    cd acnc-66k-lead-etl-pipeline
    ```
 
